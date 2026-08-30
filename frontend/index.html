@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta
+    name="description"
+    content="YouTube Video Intelligence Analyzer - analyze YouTube videos, SEO, keywords, content, audience and AI insights."
+  />
+
+  <title>YouTube Video Intelligence Analyzer</title>
+
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+
+  <!-- MOBILE OVERLAY -->
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+
+    <div class="brand">
+      <div class="brand-icon">▶</div>
+
+      <div>
+        <div class="brand-title">YouTube V.I.A.</div>
+        <div class="brand-subtitle">Intelligence Analyzer</div>
+      </div>
+    </div>
+
+    <nav class="menu">
+
+      <a href="#dashboard" class="menu-item active">
+        <span>🏠</span>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="#level1" class="menu-item">
+        <span>🟢</span>
+        <span>Level 1</span>
+      </a>
+
+      <a href="#level2" class="menu-item">
+        <span>🟡</span>
+        <span>Level 2</span>
+      </a>
+
+      <a href="#level3" class="menu-item">
+        <span>🔴</span>
+        <span>Level 3</span>
+      </a>
+
+      <div class="menu-heading">
+        ANALYSIS
+      </div>
+
+      <a href="#seo" class="menu-item">
+        <span>🔎</span>
+        <span>SEO Analysis</span>
+      </a>
+
+      <a href="#keywords" class="menu-item">
+        <span>🔑</span>
+        <span>Keywords</span>
+      </a>
+
+      <a href="#content" class="menu-item">
+        <span>🧠</span>
+        <span>AI Content</span>
+      </a>
+
+      <a href="#audience" class="menu-item">
+        <span>👥</span>
+        <span>Audience</span>
+      </a>
+
+      <a href="#competitor" class="menu-item">
+        <span>📊</span>
+        <span>Related Videos</span>
+      </a>
+
+      <a href="#map" class="menu-item">
+        <span>🗺️</span>
+        <span>Location / Map</span>
+      </a>
+
+      <div class="menu-heading">
+        TOOLS
+      </div>
+
+      <button id="exportJsonBtn" class="menu-button">
+        <span>📥</span>
+        <span>Export JSON</span>
+      </button>
+
+      <button id="printBtn" class="menu-button">
+        <span>🖨️</span>
+        <span>Print Report</span>
+      </button>
+
+      <a href="#about" class="menu-item">
+        <span>ℹ️</span>
+        <span>About</span>
+      </a>
+
+      <a href="#privacy" class="menu-item">
+        <span>🔒</span>
+        <span>Privacy</span>
+      </a>
+
+      <a href="#contact" class="menu-item">
+        <span>📧</span>
+        <span>Contact</span>
+      </a>
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>© 2026</span>
+      <span>V.I.A.</span>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+
+      <button id="menuToggle" class="mobile-menu">
+        ☰
+      </button>
+
+      <div class="topbar-title">
+        YouTube Video Intelligence Analyzer
+      </div>
+
+      <div class="topbar-actions">
+        <span class="status-dot"></span>
+        <span>Online</span>
+      </div>
+
+    </header>
+
+    <!-- HERO -->
+    <section id="dashboard" class="hero">
+
+      <div class="hero-content">
+
+        <div class="hero-badge">
+          ⚡ AI-POWERED VIDEO INTELLIGENCE
+        </div>
+
+        <h1>
+          Analyze Any
+          <span>YouTube Video</span>
+        </h1>
+
+        <p>
+          Get video metadata, SEO, keywords, content intelligence,
+          audience insights, related videos and AI-powered recommendations
+          from one URL.
+        </p>
+
+        <div class="url-box">
+
+          <input
+            id="youtubeUrl"
+            type="url"
+            placeholder="Paste YouTube video URL here..."
+            autocomplete="off"
+          />
+
+          <button id="analyzeBtn">
+            <span id="analyzeIcon">🔍</span>
+            <span id="analyzeText">Analyze Video</span>
+          </button>
+
+        </div>
+
+        <div class="example-row">
+
+          <span>Example:</span>
+
+          <button id="exampleBtn">
+            Use sample URL
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- LOADING -->
+    <section id="loading" class="loading-section hidden">
+
+      <div class="loader"></div>
+
+      <h2>Analyzing Video...</h2>
+
+      <p id="loadingText">
+        Fetching YouTube information...
+      </p>
+
+      <div class="loading-steps">
+
+        <div id="step1" class="loading-step">
+          <span>✓</span>
+          Video URL
+        </div>
+
+        <div id="step2" class="loading-step">
+          <span>○</span>
+          YouTube metadata
+        </div>
+
+        <div id="step3" class="loading-step">
+          <span>○</span>
+          SEO analysis
+        </div>
+
+        <div id="step4" class="loading-step">
+          <span>○</span>
+          AI intelligence
+        </div>
+
+        <div id="step5" class="loading-step">
+          <span>○</span>
+          Building report
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ERROR -->
+    <section id="errorBox" class="error-box hidden">
+
+      <div class="error-icon">
+        ⚠️
+      </div>
+
+      <div>
+        <h3>Analysis failed</h3>
+        <p id="errorMessage"></p>
+      </div>
+
+    </section>
+
+    <!-- REPORT -->
+    <div id="report" class="report hidden">
+
+      <!-- VIDEO HEADER -->
+      <section id="level1" class="video-header card">
+
+        <div class="video-preview">
+
+          <div class="video-frame">
+
+            <iframe
+              id="videoFrame"
+              src=""
+              title="YouTube video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen>
+            </iframe>
+
+          </div>
+
+        </div>
+
+        <div class="video-info">
+
+          <div class="level-label level-green">
+            LEVEL 1 • BASIC INTELLIGENCE
+          </div>
+
+          <h2 id="videoTitle">
+            —
+          </h2>
+
+          <div class="channel-line">
+
+            <div id="channelAvatar" class="channel-avatar">
+              ▶
+            </div>
+
+            <div>
+              <strong id="channelName">
+                —
+              </strong>
+
+              <div id="publishedDate">
+                —
+              </div>
+            </div>
+
+          </div>
+
+          <div class="video-meta">
+
+            <div>
+              <span>⏱️</span>
+              <strong id="duration">—</strong>
+            </div>
+
+            <div>
+              <span>👁️</span>
+              <strong id="views">—</strong>
+            </div>
+
+            <div>
+              <span>👍</span>
+              <strong id="likes">—</strong>
+            </div>
+
+            <div>
+              <span>💬</span>
+              <strong id="comments">—</strong>
+            </div>
+
+          </div>
+
+          <div class="video-links">
+
+            <a id="watchVideo"
+               href="#"
+               target="_blank"
+               rel="noopener noreferrer">
+              ▶ Watch on YouTube
+            </a>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- QUICK SCORE -->
+      <section class="score-grid">
+
+        <div class="score-card">
+          <div class="score-title">SEO Score</div>
+          <div id="seoScore" class="big-score">—</div>
+          <div class="score-bar">
+            <span id="seoScoreBar"></span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-title">Title Score</div>
+          <div id="titleScore" class="big-score">—</div>
+          <div class="score-bar">
+            <span id="titleScoreBar"></span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-title">Description</div>
+          <div id="descriptionScore" class="big-score">—</div>
+          <div class="score-bar">
+            <span id="descriptionScoreBar"></span>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-title">Content</div>
+          <div id="contentScore" class="big-score">—</div>
+          <div class="score-bar">
+            <span id="contentScoreBar"></span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- LEVEL 1 -->
+      <section class="section">
+
+        <div class="section-title">
+          <div>
+            <span class="section-number green">1</span>
+            Basic Video Information
+          </div>
+
+          <span class="level-pill green-pill">
+            LEVEL 1
+          </span>
+        </div>
+
+        <div class="info-grid">
+
+          <div class="info-card">
+            <span>Video ID</span>
+            <strong id="videoId">—</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Category</span>
+            <strong id="category">—</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Language</span>
+            <strong id="language">—</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Definition</span>
+            <strong id="definition">—</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Dimension</span>
+            <strong id="dimension">—</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Caption</span>
+            <strong id="caption">—</strong>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- DESCRIPTION -->
+      <section class="section">
+
+        <div class="section-title">
+          <div>
+            <span class="section-number blue">2</span>
+            Description
+          </div>
+        </div>
+
+        <div class="description-card">
+
+          <div id="descriptionText" class="description-text">
+            —
+          </div>
+
+          <div class="description-stats">
+
+            <span>
+              Characters:
+              <strong id="descriptionChars">0</strong>
+            </span>
+
+            <span>
+              Words:
+              <strong id="descriptionWords">0</strong>
+            </span>
+
+            <span>
+              Hashtags:
+              <strong id="descriptionHashtags">0</strong>
+            </span>
+
+            <span>
+              Links:
+              <strong id="descriptionLinks">0</strong>
+            </span>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- SEO -->
+      <section id="seo" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number purple">3</span>
+            SEO Intelligence
+          </div>
+
+          <span class="level-pill purple-pill">
+            LEVEL 2
+          </span>
+
+        </div>
+
+        <div class="seo-layout">
+
+          <div class="seo-main card">
+
+            <h3>SEO Overview</h3>
+
+            <div class="seo-bars">
+
+              <div class="seo-row">
+                <div>
+                  <span>Title Optimization</span>
+                  <strong id="seoTitleScore">—</strong>
+                </div>
+                <div class="progress">
+                  <span id="seoTitleBar"></span>
+                </div>
+              </div>
+
+              <div class="seo-row">
+                <div>
+                  <span>Description</span>
+                  <strong id="seoDescriptionScore">—</strong>
+                </div>
+                <div class="progress">
+                  <span id="seoDescriptionBar"></span>
+                </div>
+              </div>
+
+              <div class="seo-row">
+                <div>
+                  <span>Keyword Coverage</span>
+                  <strong id="seoKeywordScore">—</strong>
+                </div>
+                <div class="progress">
+                  <span id="seoKeywordBar"></span>
+                </div>
+              </div>
+
+              <div class="seo-row">
+                <div>
+                  <span>Content Structure</span>
+                  <strong id="seoStructureScore">—</strong>
+                </div>
+                <div class="progress">
+                  <span id="seoStructureBar"></span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="seo-main card">
+
+            <h3>Search Intent</h3>
+
+            <div id="searchIntent" class="intent-box">
+              —
+            </div>
+
+            <h3>Content Type</h3>
+
+            <div id="contentType" class="intent-box">
+              —
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- KEYWORDS -->
+      <section id="keywords" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number orange">4</span>
+            Keyword Intelligence
+          </div>
+
+        </div>
+
+        <div class="keyword-layout">
+
+          <div class="keyword-card primary-keywords">
+
+            <h3>🔥 Primary Keywords</h3>
+
+            <div id="primaryKeywords" class="tag-list">
+              —
+            </div>
+
+          </div>
+
+          <div class="keyword-card secondary-keywords">
+
+            <h3>🔑 Secondary Keywords</h3>
+
+            <div id="secondaryKeywords" class="tag-list">
+              —
+            </div>
+
+          </div>
+
+          <div class="keyword-card longtail-keywords">
+
+            <h3>🎯 Long-tail Keywords</h3>
+
+            <div id="longtailKeywords" class="tag-list">
+              —
+            </div>
+
+          </div>
+
+          <div class="keyword-card hashtags">
+
+            <h3>#️⃣ Suggested Hashtags</h3>
+
+            <div id="hashtags" class="tag-list">
+              —
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- TAGS -->
+      <section class="section">
+
+        <div class="section-title">
+          <div>
+            <span class="section-number cyan">5</span>
+            YouTube Tags
+          </div>
+        </div>
+
+        <div class="tags-card">
+
+          <div id="youtubeTags" class="tag-list">
+            —
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- CHAPTERS -->
+      <section class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number pink">6</span>
+            Chapters
+          </div>
+
+        </div>
+
+        <div id="chapters" class="chapters">
+          —
+        </div>
+
+      </section>
+
+      <!-- LEVEL 2 AI -->
+      <section id="level2" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number yellow">7</span>
+            AI Content Intelligence
+          </div>
+
+          <span class="level-pill yellow-pill">
+            LEVEL 2
+          </span>
+
+        </div>
+
+        <div class="ai-grid">
+
+          <div class="ai-card">
+
+            <h3>🧠 Main Topic</h3>
+
+            <p id="mainTopic">—</p>
+
+          </div>
+
+          <div class="ai-card">
+
+            <h3>📚 Content Type</h3>
+
+            <p id="aiContentType">—</p>
+
+          </div>
+
+          <div class="ai-card">
+
+            <h3>🎯 Difficulty</h3>
+
+            <p id="difficulty">—</p>
+
+          </div>
+
+          <div class="ai-card">
+
+            <h3>🔍 Search Intent</h3>
+
+            <p id="aiSearchIntent">—</p>
+
+          </div>
+
+        </div>
+
+        <div class="card ai-summary">
+
+          <h3>Summary</h3>
+
+          <p id="summary">
+            —
+          </p>
+
+        </div>
+
+        <div class="card">
+
+          <h3>Key Points</h3>
+
+          <ul id="keyPoints" class="nice-list"></ul>
+
+        </div>
+
+      </section>
+
+      <!-- TONE -->
+      <section id="audience" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number red">8</span>
+            Audience & Tone
+          </div>
+
+        </div>
+
+        <div class="audience-grid">
+
+          <div class="card">
+
+            <h3>👥 Likely Audience</h3>
+
+            <ul id="audienceList" class="nice-list"></ul>
+
+          </div>
+
+          <div class="card">
+
+            <h3>🎭 Tone</h3>
+
+            <div id="toneList" class="tone-list"></div>
+
+          </div>
+
+          <div class="card">
+
+            <h3>❤️ Sentiment</h3>
+
+            <div id="sentiment" class="sentiment-box">
+              —
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- LEVEL 3 -->
+      <section id="level3" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number dark-red">9</span>
+            Pro Intelligence
+          </div>
+
+          <span class="level-pill red-pill">
+            LEVEL 3
+          </span>
+
+        </div>
+
+        <div class="pro-grid">
+
+          <div class="pro-card">
+            <h3>🔥 Shorts Ideas</h3>
+            <ol id="shortsIdeas"></ol>
+          </div>
+
+          <div class="pro-card">
+            <h3>📝 Blog Ideas</h3>
+            <ol id="blogIdeas"></ol>
+          </div>
+
+          <div class="pro-card">
+            <h3>🎬 Related Videos</h3>
+            <ol id="relatedIdeas"></ol>
+          </div>
+
+          <div class="pro-card">
+            <h3>❓ FAQ Ideas</h3>
+            <ol id="faqIdeas"></ol>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- TITLE SUGGESTIONS -->
+      <section class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number green">10</span>
+            Better Titles
+          </div>
+
+        </div>
+
+        <div id="titleSuggestions" class="suggestion-list">
+          —
+        </div>
+
+      </section>
+
+      <!-- CONTENT GAP -->
+      <section id="content" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number purple">11</span>
+            Content Gap Opportunities
+          </div>
+
+        </div>
+
+        <div id="contentGaps" class="gap-list">
+          —
+        </div>
+
+      </section>
+
+      <!-- RELATED VIDEOS -->
+      <section id="competitor" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number blue">12</span>
+            Related YouTube Videos
+          </div>
+
+        </div>
+
+        <div id="relatedVideos" class="related-grid">
+          —
+        </div>
+
+      </section>
+
+      <!-- MAP -->
+      <section id="map" class="section">
+
+        <div class="section-title">
+
+          <div>
+            <span class="section-number cyan">13</span>
+            Video Location
+          </div>
+
+        </div>
+
+        <div id="mapContainer" class="map-container">
+
+          <div class="map-placeholder">
+
+            <div class="map-icon">🗺️</div>
+
+            <h3>No public location data</h3>
+
+            <p>
+              A map will appear when location information is
+              publicly available for the analyzed video.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- AD SLOT -->
+      <section class="ad-container">
+
+        <div class="ad-label">
+          Advertisement
+        </div>
+
+        <div class="ad-placeholder">
+          AD SPACE
+        </div>
+
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="legal-section">
+
+        <h2>About YouTube Video Intelligence Analyzer</h2>
+
+        <p>
+          YouTube Video Intelligence Analyzer is an independent
+          analysis tool designed to organize publicly available
+          YouTube video information and provide AI-assisted insights.
+        </p>
+
+      </section>
+
+      <section id="privacy" class="legal-section">
+
+        <h2>Privacy</h2>
+
+        <p>
+          The analyzer should not request your YouTube password or
+          YouTube OAuth login for public-video analysis. Video URLs
+          submitted for analysis are sent to the backend only for
+          processing the requested report.
+        </p>
+
+      </section>
+
+      <section id="contact" class="legal-section">
+
+        <h2>Contact</h2>
+
+        <p>
+          Add your support/contact email here before publishing.
+        </p>
+
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+
+        <div>
+          YouTube Video Intelligence Analyzer
+        </div>
+
+        <div>
+          Independent third-party analysis tool.
+        </div>
+
+      </footer>
+
+    </div>
+
+  </main>
+
+  <script src="./app.js"></script>
+
+</body>
+</html>

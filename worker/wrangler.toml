@@ -1,0 +1,21 @@
+name = "youtube-video-intelligence-api"
+
+main = "src/index.js"
+
+compatibility_date = "2026-08-30"
+
+[vars]
+AI_ENABLED = "true"
+
+YOUTUBE_RELATED_SEARCH = "true"
+
+AI_PRIMARY = "gemini"
+
+AI_GEMINI_MODEL = "gemini-2.5-flash"
+
+AI_GROQ_MODEL = "llama-3.3-70b-versatile"
+
+AI_OPENROUTER_MODEL = "openai/gpt-oss-20b"
+
+[observability]
+enabled = true
