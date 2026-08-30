@@ -94,19 +94,12 @@ export default {
           ),
 
         aiEnabled:
-          env.AI_ENABLED !== "false",
+          env.YOUTUBEVIDEOANALYZER_AI_ENABLED !==
+          "false",
 
-        aiPrimary:
-          env.AI_PRIMARY ||
-          "gemini",
-
-        fallbackOrder: [
-          "Gemini",
-          "Groq",
-          "OpenRouter",
-          "OpenAI",
-          "Local heuristic fallback"
-        ]
+        relatedSearchEnabled:
+          env.YOUTUBEVIDEOANALYZER_YOUTUBE_RELATED_SEARCH !==
+          "false"
       });
     }
 
@@ -138,10 +131,7 @@ async function analyzeRequest(
 
   try {
 
-    /*
-      YOUTUBE API KEY
-      Required for all analysis levels.
-    */
+    /* YOUTUBE API CHECK */
 
     if (
       !env.YOUTUBEVIDEOANALYZER_YOUTUBE_API_KEY
@@ -200,11 +190,10 @@ async function analyzeRequest(
 
     /* STEP 3: RELATED VIDEOS */
 
-    let relatedVideos =
-      [];
+    let relatedVideos = [];
 
     if (
-      env.YOUTUBE_RELATED_SEARCH !==
+      env.YOUTUBEVIDEOANALYZER_YOUTUBE_RELATED_SEARCH !==
       "false"
     ) {
 
@@ -215,8 +204,8 @@ async function analyzeRequest(
             video.title,
             ...(
               analysis
-                .keywords
-                .primary || []
+                ?.keywords
+                ?.primary || []
             )
           ]
             .join(" ")
@@ -235,8 +224,7 @@ async function analyzeRequest(
           error
         );
 
-        relatedVideos =
-          [];
+        relatedVideos = [];
       }
     }
 
@@ -259,7 +247,7 @@ async function analyzeRequest(
     };
 
     if (
-      env.AI_ENABLED !==
+      env.YOUTUBEVIDEOANALYZER_AI_ENABLED !==
       "false"
     ) {
 
@@ -294,8 +282,7 @@ async function analyzeRequest(
       ok: true,
 
       analyzedAt:
-        new Date()
-          .toISOString(),
+        new Date().toISOString(),
 
       level,
 

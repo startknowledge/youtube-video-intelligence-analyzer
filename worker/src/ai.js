@@ -1,4 +1,3 @@
-
 import {
   safeJsonParse
 } from "./utils.js";
@@ -110,10 +109,9 @@ ONLY valid JSON.
 `;
 }
 
-
 /* =========================================================
    GEMINI
-   ========================================================= */
+========================================================= */
 
 async function callGemini(
   prompt,
@@ -123,12 +121,6 @@ async function callGemini(
   const apiKey =
     env.YOUTUBEVIDEOANALYZER_GEMINI_API_KEY;
 
-  /*
-    IMPORTANT:
-    If Gemini secret is not configured,
-    throw immediately so fallback can continue.
-  */
-
   if (!apiKey) {
 
     throw new Error(
@@ -137,7 +129,7 @@ async function callGemini(
   }
 
   const model =
-    env.AI_GEMINI_MODEL ||
+    env.YOUTUBEVIDEOANALYZER_AI_GEMINI_MODEL ||
     "gemini-2.5-flash";
 
   const endpoint =
@@ -232,10 +224,9 @@ async function callGemini(
   };
 }
 
-
 /* =========================================================
-   OPENAI-COMPATIBLE PROVIDERS
-   ========================================================= */
+   OPENAI-COMPATIBLE
+========================================================= */
 
 async function callOpenAICompatible(
   endpoint,
@@ -274,18 +265,21 @@ async function callOpenAICompatible(
           messages: [
 
             {
-              role: "system",
+              role:
+                "system",
 
               content:
                 SYSTEM_PROMPT
             },
 
             {
-              role: "user",
+              role:
+                "user",
 
               content:
                 prompt
             }
+
           ],
 
           temperature:
@@ -339,10 +333,9 @@ async function callOpenAICompatible(
   };
 }
 
-
 /* =========================================================
    GROQ
-   ========================================================= */
+========================================================= */
 
 async function callGroq(
   prompt,
@@ -355,7 +348,7 @@ async function callGroq(
 
     env.YOUTUBEVIDEOANALYZER_GROQ_API_KEY,
 
-    env.AI_GROQ_MODEL ||
+    env.YOUTUBEVIDEOANALYZER_AI_GROQ_MODEL ||
       "llama-3.3-70b-versatile",
 
     prompt,
@@ -364,10 +357,9 @@ async function callGroq(
   );
 }
 
-
 /* =========================================================
    OPENROUTER
-   ========================================================= */
+========================================================= */
 
 async function callOpenRouter(
   prompt,
@@ -380,7 +372,7 @@ async function callOpenRouter(
 
     env.YOUTUBEVIDEOANALYZER_OPENROUTER_API_KEY,
 
-    env.AI_OPENROUTER_MODEL ||
+    env.YOUTUBEVIDEOANALYZER_AI_OPENROUTER_MODEL ||
       "openai/gpt-oss-20b",
 
     prompt,
@@ -389,10 +381,9 @@ async function callOpenRouter(
   );
 }
 
-
 /* =========================================================
    OPENAI
-   ========================================================= */
+========================================================= */
 
 async function callOpenAI(
   prompt,
@@ -405,7 +396,7 @@ async function callOpenAI(
 
     env.YOUTUBEVIDEOANALYZER_OPENAI_API_KEY,
 
-    env.AI_OPENAI_MODEL ||
+    env.YOUTUBEVIDEOANALYZER_AI_OPENAI_MODEL ||
       "gpt-4o-mini",
 
     prompt,
@@ -414,10 +405,9 @@ async function callOpenAI(
   );
 }
 
-
 /* =========================================================
-   MAIN AI FALLBACK ENGINE
-   ========================================================= */
+   AI ENGINE + FALLBACK
+========================================================= */
 
 export async function generateAI(
   video,
@@ -431,18 +421,13 @@ export async function generateAI(
       analysis
     );
 
-  const attempts =
-    [];
+  const attempts = [];
 
-  /*
-    FIXED FALLBACK ORDER:
-
-    1. Gemini
-    2. Groq
-    3. OpenRouter
-    4. OpenAI
-    5. Local heuristic fallback
-  */
+  const primary =
+    (
+      env.YOUTUBEVIDEOANALYZER_AI_PRIMARY ||
+      "gemini"
+    ).toLowerCase();
 
   const providers = [
 
@@ -489,49 +474,21 @@ export async function generateAI(
           env
         )
     }
+
   ];
 
-
-  /*
-    Optional primary provider.
-
-    If AI_PRIMARY is set, that provider
-    gets tried first.
-
-    After it fails, the remaining
-    providers continue in the normal
-    fallback order.
-  */
-
-  const primary =
-    (
-      env.AI_PRIMARY ||
-      "gemini"
-    ).toLowerCase();
+  /* Primary provider first */
 
   providers.sort(
-    (a, b) => {
-
-      if (
-        a.name === primary
-      ) {
-        return -1;
-      }
-
-      if (
-        b.name === primary
-      ) {
-        return 1;
-      }
-
-      return 0;
-    }
+    (a, b) =>
+      a.name === primary
+        ? -1
+        : b.name === primary
+          ? 1
+          : 0
   );
 
-
-  /*
-    Try providers one by one.
-  */
+  /* Try providers in order */
 
   for (
     const provider of providers
@@ -555,7 +512,7 @@ export async function generateAI(
     } catch (error) {
 
       console.error(
-        `AI PROVIDER FAILED: ${provider.name}`,
+        `${provider.name} failed:`,
         error
       );
 
@@ -571,14 +528,7 @@ export async function generateAI(
     }
   }
 
-
-  /*
-    ALL AI PROVIDERS FAILED
-    -----------------------
-    Do not fail the whole YouTube analysis.
-
-    Return local heuristic analysis.
-  */
+  /* ALL AI FAILED */
 
   return {
 
@@ -601,10 +551,9 @@ export async function generateAI(
   };
 }
 
-
 /* =========================================================
    LOCAL FALLBACK
-   ========================================================= */
+========================================================= */
 
 function createLocalFallback(
   video,
@@ -614,8 +563,7 @@ function createLocalFallback(
   const primary =
     analysis
       ?.keywords
-      ?.primary ||
-      [];
+      ?.primary || [];
 
   return {
 
@@ -658,7 +606,9 @@ function createLocalFallback(
     ],
 
     audience: [
+
       "Audience could not be reliably inferred."
+
     ],
 
     tone: {
@@ -721,6 +671,7 @@ function createLocalFallback(
       `Everything You Need to Know About ${video.title}`,
 
       `${video.title}: Beginner to Advanced Guide`
+
     ],
 
     contentGaps: [
@@ -732,6 +683,7 @@ function createLocalFallback(
       "Add frequently asked questions.",
 
       "Add a clear conclusion and next steps."
+
     ]
   };
 }

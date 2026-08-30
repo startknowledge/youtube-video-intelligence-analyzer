@@ -5,17 +5,21 @@ main = "src/index.js"
 compatibility_date = "2026-08-30"
 
 [vars]
-AI_ENABLED = "true"
 
-YOUTUBE_RELATED_SEARCH = "true"
+YOUTUBEVIDEOANALYZER_AI_ENABLED = "true"
 
-AI_PRIMARY = "gemini"
+YOUTUBEVIDEOANALYZER_YOUTUBE_RELATED_SEARCH = "true"
 
-AI_GEMINI_MODEL = "gemini-2.5-flash"
+YOUTUBEVIDEOANALYZER_AI_PRIMARY = "gemini"
 
-AI_GROQ_MODEL = "llama-3.3-70b-versatile"
+YOUTUBEVIDEOANALYZER_AI_GEMINI_MODEL = "gemini-2.5-flash"
 
-AI_OPENROUTER_MODEL = "openai/gpt-oss-20b"
+YOUTUBEVIDEOANALYZER_AI_GROQ_MODEL = "llama-3.3-70b-versatile"
+
+YOUTUBEVIDEOANALYZER_AI_OPENROUTER_MODEL = "openai/gpt-oss-20b"
+
+YOUTUBEVIDEOANALYZER_AI_OPENAI_MODEL = "gpt-4o-mini"
 
 [observability]
+
 enabled = true
