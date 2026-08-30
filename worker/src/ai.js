@@ -1,3 +1,4 @@
+
 import {
   safeJsonParse
 } from "./utils.js";
@@ -109,14 +110,29 @@ ONLY valid JSON.
 `;
 }
 
+
+/* =========================================================
+   GEMINI
+   ========================================================= */
+
 async function callGemini(
   prompt,
   env
 ) {
 
-  if (!env.GEMINI_API_KEY) {
+  const apiKey =
+    env.YOUTUBEVIDEOANALYZER_GEMINI_API_KEY;
+
+  /*
+    IMPORTANT:
+    If Gemini secret is not configured,
+    throw immediately so fallback can continue.
+  */
+
+  if (!apiKey) {
+
     throw new Error(
-      "GEMINI_API_KEY missing"
+      "YOUTUBEVIDEOANALYZER_GEMINI_API_KEY missing"
     );
   }
 
@@ -125,7 +141,7 @@ async function callGemini(
     "gemini-2.5-flash";
 
   const endpoint =
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(env.GEMINI_API_KEY)}`;
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
   const response =
     await fetch(
@@ -139,6 +155,7 @@ async function callGemini(
         },
 
         body: JSON.stringify({
+
           systemInstruction: {
             parts: [
               {
@@ -154,14 +171,17 @@ async function callGemini(
 
               parts: [
                 {
-                  text: prompt
+                  text:
+                    prompt
                 }
               ]
             }
           ],
 
           generationConfig: {
-            temperature: 0.25,
+
+            temperature:
+              0.25,
 
             responseMimeType:
               "application/json"
@@ -194,17 +214,28 @@ async function callGemini(
     safeJsonParse(text);
 
   if (!parsed) {
+
     throw new Error(
       "Gemini returned invalid JSON"
     );
   }
 
   return {
-    provider: "Gemini",
+
+    provider:
+      "Gemini",
+
     model,
-    data: parsed
+
+    data:
+      parsed
   };
 }
+
+
+/* =========================================================
+   OPENAI-COMPATIBLE PROVIDERS
+   ========================================================= */
 
 async function callOpenAICompatible(
   endpoint,
@@ -215,6 +246,7 @@ async function callOpenAICompatible(
 ) {
 
   if (!apiKey) {
+
     throw new Error(
       `${provider} API key missing`
     );
@@ -227,6 +259,7 @@ async function callOpenAICompatible(
         method: "POST",
 
         headers: {
+
           "Content-Type":
             "application/json",
 
@@ -235,27 +268,35 @@ async function callOpenAICompatible(
         },
 
         body: JSON.stringify({
+
           model,
 
           messages: [
+
             {
               role: "system",
+
               content:
                 SYSTEM_PROMPT
             },
 
             {
               role: "user",
-              content: prompt
+
+              content:
+                prompt
             }
           ],
 
-          temperature: 0.25,
+          temperature:
+            0.25,
 
-          max_tokens: 6000,
+          max_tokens:
+            6000,
 
           response_format: {
-            type: "json_object"
+            type:
+              "json_object"
           }
         })
       }
@@ -281,17 +322,27 @@ async function callOpenAICompatible(
     safeJsonParse(text);
 
   if (!parsed) {
+
     throw new Error(
       `${provider} returned invalid JSON`
     );
   }
 
   return {
+
     provider,
+
     model,
-    data: parsed
+
+    data:
+      parsed
   };
 }
+
+
+/* =========================================================
+   GROQ
+   ========================================================= */
 
 async function callGroq(
   prompt,
@@ -299,9 +350,10 @@ async function callGroq(
 ) {
 
   return callOpenAICompatible(
+
     "https://api.groq.com/openai/v1/chat/completions",
 
-    env.GROQ_API_KEY,
+    env.YOUTUBEVIDEOANALYZER_GROQ_API_KEY,
 
     env.AI_GROQ_MODEL ||
       "llama-3.3-70b-versatile",
@@ -312,15 +364,21 @@ async function callGroq(
   );
 }
 
+
+/* =========================================================
+   OPENROUTER
+   ========================================================= */
+
 async function callOpenRouter(
   prompt,
   env
 ) {
 
   return callOpenAICompatible(
+
     "https://openrouter.ai/api/v1/chat/completions",
 
-    env.OPENROUTER_API_KEY,
+    env.YOUTUBEVIDEOANALYZER_OPENROUTER_API_KEY,
 
     env.AI_OPENROUTER_MODEL ||
       "openai/gpt-oss-20b",
@@ -330,6 +388,36 @@ async function callOpenRouter(
     "OpenRouter"
   );
 }
+
+
+/* =========================================================
+   OPENAI
+   ========================================================= */
+
+async function callOpenAI(
+  prompt,
+  env
+) {
+
+  return callOpenAICompatible(
+
+    "https://api.openai.com/v1/chat/completions",
+
+    env.YOUTUBEVIDEOANALYZER_OPENAI_API_KEY,
+
+    env.AI_OPENAI_MODEL ||
+      "gpt-4o-mini",
+
+    prompt,
+
+    "OpenAI"
+  );
+}
+
+
+/* =========================================================
+   MAIN AI FALLBACK ENGINE
+   ========================================================= */
 
 export async function generateAI(
   video,
@@ -343,17 +431,25 @@ export async function generateAI(
       analysis
     );
 
-  const attempts = [];
+  const attempts =
+    [];
 
-  const primary =
-    (
-      env.AI_PRIMARY ||
-      "gemini"
-    ).toLowerCase();
+  /*
+    FIXED FALLBACK ORDER:
+
+    1. Gemini
+    2. Groq
+    3. OpenRouter
+    4. OpenAI
+    5. Local heuristic fallback
+  */
 
   const providers = [
+
     {
-      name: "gemini",
+      name:
+        "gemini",
+
       call: () =>
         callGemini(
           prompt,
@@ -362,7 +458,9 @@ export async function generateAI(
     },
 
     {
-      name: "groq",
+      name:
+        "groq",
+
       call: () =>
         callGroq(
           prompt,
@@ -371,23 +469,69 @@ export async function generateAI(
     },
 
     {
-      name: "openrouter",
+      name:
+        "openrouter",
+
       call: () =>
         callOpenRouter(
+          prompt,
+          env
+        )
+    },
+
+    {
+      name:
+        "openai",
+
+      call: () =>
+        callOpenAI(
           prompt,
           env
         )
     }
   ];
 
+
+  /*
+    Optional primary provider.
+
+    If AI_PRIMARY is set, that provider
+    gets tried first.
+
+    After it fails, the remaining
+    providers continue in the normal
+    fallback order.
+  */
+
+  const primary =
+    (
+      env.AI_PRIMARY ||
+      "gemini"
+    ).toLowerCase();
+
   providers.sort(
-    (a, b) =>
-      a.name === primary
-        ? -1
-        : b.name === primary
-          ? 1
-          : 0
+    (a, b) => {
+
+      if (
+        a.name === primary
+      ) {
+        return -1;
+      }
+
+      if (
+        b.name === primary
+      ) {
+        return 1;
+      }
+
+      return 0;
+    }
   );
+
+
+  /*
+    Try providers one by one.
+  */
 
   for (
     const provider of providers
@@ -399,6 +543,7 @@ export async function generateAI(
         await provider.call();
 
       return {
+
         ...result,
 
         fallbackUsed:
@@ -409,23 +554,42 @@ export async function generateAI(
 
     } catch (error) {
 
+      console.error(
+        `AI PROVIDER FAILED: ${provider.name}`,
+        error
+      );
+
       attempts.push({
+
         provider:
           provider.name,
 
         error:
-          error.message
+          error?.message ||
+          "Unknown provider error"
       });
-
     }
   }
 
+
+  /*
+    ALL AI PROVIDERS FAILED
+    -----------------------
+    Do not fail the whole YouTube analysis.
+
+    Return local heuristic analysis.
+  */
+
   return {
-    provider: "Local heuristic fallback",
 
-    model: "none",
+    provider:
+      "Local heuristic fallback",
 
-    fallbackUsed: true,
+    model:
+      "none",
+
+    fallbackUsed:
+      true,
 
     attempts,
 
@@ -437,6 +601,11 @@ export async function generateAI(
   };
 }
 
+
+/* =========================================================
+   LOCAL FALLBACK
+   ========================================================= */
+
 function createLocalFallback(
   video,
   analysis
@@ -445,7 +614,8 @@ function createLocalFallback(
   const primary =
     analysis
       ?.keywords
-      ?.primary || [];
+      ?.primary ||
+      [];
 
   return {
 
@@ -471,30 +641,42 @@ function createLocalFallback(
           )
         : "AI analysis unavailable.",
 
-    keyPoints:
-      [
-        `Video title: ${video.title}`,
-        `Channel: ${video.channelTitle}`,
-        `Category: ${video.categoryTitle}`,
-        ...primary
-          .slice(0, 5)
-          .map(
-            (k) =>
-              `Important keyword: ${k}`
-          )
-      ],
+    keyPoints: [
 
-    audience:
-      [
-        "Audience could not be reliably inferred."
-      ],
+      `Video title: ${video.title}`,
+
+      `Channel: ${video.channelTitle}`,
+
+      `Category: ${video.categoryTitle}`,
+
+      ...primary
+        .slice(0, 5)
+        .map(
+          (k) =>
+            `Important keyword: ${k}`
+        )
+    ],
+
+    audience: [
+      "Audience could not be reliably inferred."
+    ],
 
     tone: {
-      Educational: 50,
-      Professional: 50,
-      Persuasive: 25,
-      Entertainment: 25,
-      Inspirational: 25
+
+      Educational:
+        50,
+
+      Professional:
+        50,
+
+      Persuasive:
+        25,
+
+      Entertainment:
+        25,
+
+      Inspirational:
+        25
     },
 
     sentiment:
@@ -532,20 +714,24 @@ function createLocalFallback(
             `What is ${k}?`
         ),
 
-    titleSuggestions:
-      [
-        `${video.title} - Complete Guide`,
-        `Everything You Need to Know About ${video.title}`,
-        `${video.title}: Beginner to Advanced Guide`
-      ],
+    titleSuggestions: [
 
-    contentGaps:
-      [
-        "Add a detailed beginner explanation.",
-        "Add practical examples.",
-        "Add frequently asked questions.",
-        "Add a clear conclusion and next steps."
-      ]
+      `${video.title} - Complete Guide`,
 
+      `Everything You Need to Know About ${video.title}`,
+
+      `${video.title}: Beginner to Advanced Guide`
+    ],
+
+    contentGaps: [
+
+      "Add a detailed beginner explanation.",
+
+      "Add practical examples.",
+
+      "Add frequently asked questions.",
+
+      "Add a clear conclusion and next steps."
+    ]
   };
 }

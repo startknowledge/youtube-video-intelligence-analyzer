@@ -26,8 +26,7 @@ export default {
   ) {
 
     if (
-      request.method ===
-      "OPTIONS"
+      request.method === "OPTIONS"
     ) {
       return corsResponse();
     }
@@ -66,27 +65,48 @@ export default {
     ) {
 
       return json({
+
         ok: true,
 
         youtubeConfigured:
           Boolean(
-            env.YOUTUBE_API_KEY
+            env.YOUTUBEVIDEOANALYZER_YOUTUBE_API_KEY
           ),
 
         geminiConfigured:
           Boolean(
-            env.GEMINI_API_KEY
+            env.YOUTUBEVIDEOANALYZER_GEMINI_API_KEY
           ),
 
         groqConfigured:
           Boolean(
-            env.GROQ_API_KEY
+            env.YOUTUBEVIDEOANALYZER_GROQ_API_KEY
           ),
 
         openrouterConfigured:
           Boolean(
-            env.OPENROUTER_API_KEY
-          )
+            env.YOUTUBEVIDEOANALYZER_OPENROUTER_API_KEY
+          ),
+
+        openaiConfigured:
+          Boolean(
+            env.YOUTUBEVIDEOANALYZER_OPENAI_API_KEY
+          ),
+
+        aiEnabled:
+          env.AI_ENABLED !== "false",
+
+        aiPrimary:
+          env.AI_PRIMARY ||
+          "gemini",
+
+        fallbackOrder: [
+          "Gemini",
+          "Groq",
+          "OpenRouter",
+          "OpenAI",
+          "Local heuristic fallback"
+        ]
       });
     }
 
@@ -118,8 +138,13 @@ async function analyzeRequest(
 
   try {
 
+    /*
+      YOUTUBE API KEY
+      Required for all analysis levels.
+    */
+
     if (
-      !env.YOUTUBE_API_KEY
+      !env.YOUTUBEVIDEOANALYZER_YOUTUBE_API_KEY
     ) {
 
       return errorResponse(
@@ -158,25 +183,22 @@ async function analyzeRequest(
       );
     }
 
-    /* STEP 1:
-       YOUTUBE */
+    /* STEP 1: YOUTUBE */
 
     const video =
       await getVideo(
         videoId,
-        env.YOUTUBE_API_KEY
+        env.YOUTUBEVIDEOANALYZER_YOUTUBE_API_KEY
       );
 
-    /* STEP 2:
-       LOCAL ANALYSIS */
+    /* STEP 2: LOCAL ANALYSIS */
 
     const analysis =
       analyzeVideo(
         video
       );
 
-    /* STEP 3:
-       RELATED VIDEOS */
+    /* STEP 3: RELATED VIDEOS */
 
     let relatedVideos =
       [];
@@ -203,18 +225,25 @@ async function analyzeRequest(
         relatedVideos =
           await getRelatedVideos(
             query,
-            env.YOUTUBE_API_KEY
+            env.YOUTUBEVIDEOANALYZER_YOUTUBE_API_KEY
           );
 
-      } catch {
-        relatedVideos = [];
+      } catch (error) {
+
+        console.error(
+          "RELATED VIDEO ERROR:",
+          error
+        );
+
+        relatedVideos =
+          [];
       }
     }
 
-    /* STEP 4:
-       AI */
+    /* STEP 4: AI */
 
     let ai = {
+
       provider:
         "Disabled",
 
@@ -224,7 +253,9 @@ async function analyzeRequest(
       fallbackUsed:
         false,
 
-      data: {}
+      data: {},
+
+      attempts: []
     };
 
     if (
@@ -240,6 +271,7 @@ async function analyzeRequest(
         );
 
       ai = {
+
         provider:
           aiResult.provider,
 
@@ -258,6 +290,7 @@ async function analyzeRequest(
     }
 
     return json({
+
       ok: true,
 
       analyzedAt:
@@ -286,6 +319,7 @@ async function analyzeRequest(
         ai.data,
 
       aiMeta: {
+
         provider:
           ai.provider,
 
@@ -293,7 +327,10 @@ async function analyzeRequest(
           ai.model,
 
         fallbackUsed:
-          ai.fallbackUsed
+          ai.fallbackUsed,
+
+        attempts:
+          ai.attempts
       }
     });
 
@@ -305,8 +342,8 @@ async function analyzeRequest(
     );
 
     return errorResponse(
-      error.message ||
-        "Unexpected analysis error.",
+      error?.message ||
+      "Unexpected analysis error.",
       500
     );
   }
