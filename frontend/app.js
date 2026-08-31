@@ -1,6 +1,6 @@
 const API_BASE =
   window.VIA_API_BASE ||
-  "https://youtube-video-intelligence-analyzer.82749sondeep.workers.dev";
+  "https://youtube-video-intelligence-api.82749sondeep.workers.dev";
 
 let latestReport = null;
 
