@@ -417,7 +417,7 @@ svg {
 .video-header,
 .info-card,
 .keyword-card,
-.tags-card,
+
 .ai-card,
 .pro-card,
 .score-card,
@@ -844,7 +844,7 @@ svg {
 }
 
 .tags-card {
-  border-top: 4px solid #ecc648;
+  border-top: 4px solid #efc94d;
 }
 
 .tag-list {
@@ -891,10 +891,12 @@ svg {
 
 .tags-card {
   padding: 20px;
+  background: #d9f9e0;
+  
 }
 
 .tags-card .tag {
-  background: #d9f9e0;
+
   color: #308141;
 }
 
