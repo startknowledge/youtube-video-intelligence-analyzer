@@ -1,5 +1,5 @@
 :root {
---bg: #f4f7fb;
+--bg: #e6edf6;
 --card: #ffffff;
 --text: #172033;
 --muted: #697386;
@@ -982,12 +982,13 @@ border-top: 4px solid #f97316;
 .hashtags {
 border-top: 4px solid #ec4899;
 }
+.tags-card {
+  border-top: 4px solid #ecc648;
+}
 
 .tag-list {
 display: flex;
-
 flex-wrap: wrap;
-
 gap: 8px;
 }
 
@@ -997,17 +998,11 @@ display: inline-flex;
 max-width: 100%;
 
 padding: 7px 10px;
-
 border-radius: 999px;
-
 background: #f1f5f9;
-
 color: #475569;
-
 font-size: 12px;
-
 font-weight: 700;
-
 overflow-wrap: anywhere;
 }
 
@@ -1039,6 +1034,10 @@ TAGS
 padding: 20px;
 }
 
+.tags-card .tag {
+  background : #d9f9e0;
+color: #308141;
+}
 /* =========================================================
 CHAPTERS
 ========================================================= */
