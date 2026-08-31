@@ -4,8 +4,7 @@ const API_BASE =
 
 let latestReport = null;
 
-const $ = (id) =>
-  document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 const youtubeUrl = $("youtubeUrl");
 const analyzeBtn = $("analyzeBtn");
@@ -13,6 +12,11 @@ const report = $("report");
 const loading = $("loading");
 const errorBox = $("errorBox");
 const errorMessage = $("errorMessage");
+
+
+/* =========================================================
+   BASIC HELPERS
+   ========================================================= */
 
 function show(element) {
   if (element) {
@@ -38,14 +42,14 @@ function escapeHtml(value) {
 function setText(id, value) {
   const element = $(id);
 
-  if (element) {
-    element.textContent =
-      value === undefined ||
-      value === null ||
-      value === ""
-        ? "—"
-        : value;
-  }
+  if (!element) return;
+
+  element.textContent =
+    value === undefined ||
+    value === null ||
+    value === ""
+      ? "—"
+      : value;
 }
 
 function number(value) {
@@ -63,29 +67,22 @@ function number(value) {
     return "—";
   }
 
-  return new Intl.NumberFormat(
-    "en-IN"
-  ).format(n);
+  return new Intl.NumberFormat("en-IN").format(n);
 }
 
 function score(value) {
-  const n =
-    Math.max(
-      0,
-      Math.min(
-        100,
-        Number(value) || 0
-      )
-    );
+  const n = Math.max(
+    0,
+    Math.min(
+      100,
+      Number(value) || 0
+    )
+  );
 
   return Math.round(n);
 }
 
-function setScore(
-  id,
-  barId,
-  value
-) {
+function setScore(id, barId, value) {
   const n = score(value);
 
   setText(id, `${n}/100`);
@@ -99,11 +96,7 @@ function setScore(
   }
 }
 
-function setProgress(
-  scoreId,
-  barId,
-  value
-) {
+function setProgress(scoreId, barId, value) {
   const n = score(value);
 
   setText(scoreId, n);
@@ -117,111 +110,169 @@ function setProgress(
   }
 }
 
-function tags(
-  elementId,
-  values
-) {
+
+/* =========================================================
+   ARRAY NORMALIZER
+   ========================================================= */
+
+function normalizeArray(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (
+          typeof item === "string" ||
+          typeof item === "number"
+        ) {
+          return String(item).trim();
+        }
+
+        if (item && typeof item === "object") {
+          return String(
+            item.title ||
+            item.text ||
+            item.idea ||
+            item.name ||
+            item.content ||
+            ""
+          ).trim();
+        }
+
+        return "";
+      })
+      .filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/\n+/)
+      .map((x) =>
+        x
+          .replace(/^\s*[-•*]\s*/, "")
+          .replace(/^\s*\d+[.)]\s*/, "")
+          .trim()
+      )
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+
+/* =========================================================
+   KEYWORD / TAG RENDERING
+   ========================================================= */
+
+function tags(elementId, values) {
   const element = $(elementId);
 
   if (!element) return;
 
-  if (
-    !Array.isArray(values) ||
-    !values.length
-  ) {
-    element.innerHTML =
-      `<span class="tag">No data</span>`;
+  const items = normalizeArray(values);
 
+  if (!items.length) {
+    element.innerHTML =
+      `<span class="tag tag-empty">No data</span>`;
     return;
   }
 
-  element.innerHTML =
-    values
-      .slice(0, 100)
-      .map(
-        (item) =>
-          `<span class="tag">${escapeHtml(item)}</span>`
-      )
-      .join("");
+  element.innerHTML = items
+    .slice(0, 100)
+    .map(
+      (item, index) =>
+        `<span class="tag tag-${(index % 8) + 1}">
+          ${escapeHtml(item)}
+        </span>`
+    )
+    .join("");
 }
 
-function list(
-  elementId,
-  values
-) {
+
+/* =========================================================
+   NORMAL LIST
+   ========================================================= */
+
+function list(elementId, values) {
   const element = $(elementId);
 
   if (!element) return;
 
-  if (
-    !Array.isArray(values) ||
-    !values.length
-  ) {
+  const items = normalizeArray(values);
+
+  if (!items.length) {
     element.innerHTML =
       "<li>No data available</li>";
-
     return;
   }
 
-  element.innerHTML =
-    values
-      .slice(0, 30)
-      .map(
-        (item) =>
-          `<li>${escapeHtml(item)}</li>`
-      )
-      .join("");
+  element.innerHTML = items
+    .slice(0, 30)
+    .map(
+      (item) =>
+        `<li>${escapeHtml(item)}</li>`
+    )
+    .join("");
 }
 
-function orderedList(
-  elementId,
-  values
-) {
+
+/* =========================================================
+   EXACTLY UP TO 5 PRO IDEAS
+   ========================================================= */
+
+function orderedList(elementId, values) {
   const element = $(elementId);
 
   if (!element) return;
 
-  if (
-    !Array.isArray(values) ||
-    !values.length
-  ) {
-    element.innerHTML =
-      "<li>No data available</li>";
+  const items = normalizeArray(values);
 
+  if (!items.length) {
+    element.innerHTML =
+      "<li>No ideas available.</li>";
     return;
   }
 
-  element.innerHTML =
-    values
-      .slice(0, 20)
-      .map(
-        (item) =>
-          `<li>${escapeHtml(item)}</li>`
-      )
-      .join("");
+  element.innerHTML = items
+    .slice(0, 5)
+    .map(
+      (item) =>
+        `<li>${escapeHtml(item)}</li>`
+    )
+    .join("");
 }
+
+
+/* =========================================================
+   DURATION
+   ========================================================= */
 
 function formatDuration(seconds) {
-  const s =
-    Number(seconds) || 0;
+  const s = Number(seconds) || 0;
 
-  const hours =
-    Math.floor(s / 3600);
+  const hours = Math.floor(s / 3600);
 
-  const minutes =
-    Math.floor(
-      (s % 3600) / 60
-    );
+  const minutes = Math.floor(
+    (s % 3600) / 60
+  );
 
-  const secs =
-    Math.floor(s % 60);
+  const secs = Math.floor(s % 60);
 
   if (hours) {
-    return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    return `${hours}:${String(minutes).padStart(
+      2,
+      "0"
+    )}:${String(secs).padStart(2, "0")}`;
   }
 
-  return `${minutes}:${String(secs).padStart(2, "0")}`;
+  return `${minutes}:${String(secs).padStart(
+    2,
+    "0"
+  )}`;
 }
+
+
+/* =========================================================
+   YOUTUBE ID
+   ========================================================= */
 
 function parseYouTubeId(url) {
   try {
@@ -230,40 +281,39 @@ function parseYouTubeId(url) {
     const hostname =
       u.hostname.toLowerCase();
 
-    if (
-      hostname === "youtu.be"
-    ) {
-      return u.pathname
-        .slice(1)
-        .split("/")[0] || null;
+    if (hostname === "youtu.be") {
+      return (
+        u.pathname
+          .slice(1)
+          .split("/")[0] || null
+      );
     }
 
-    if (
-      hostname.includes("youtube.com")
-    ) {
-      if (
-        u.pathname === "/watch"
-      ) {
+    if (hostname.includes("youtube.com")) {
+      if (u.pathname === "/watch") {
         return u.searchParams.get("v");
       }
 
       if (
         u.pathname.startsWith("/shorts/")
       ) {
-        return u.pathname
-          .split("/")[2] || null;
+        return (
+          u.pathname.split("/")[2] ||
+          null
+        );
       }
 
       if (
         u.pathname.startsWith("/embed/")
       ) {
-        return u.pathname
-          .split("/")[2] || null;
+        return (
+          u.pathname.split("/")[2] ||
+          null
+        );
       }
     }
 
     return null;
-
   } catch {
     return null;
   }
@@ -283,15 +333,8 @@ const loadingStepMessages = [
 ];
 
 function resetLoadingSteps() {
-
-  for (
-    let i = 1;
-    i <= 5;
-    i++
-  ) {
-
-    const step =
-      $(`step${i}`);
+  for (let i = 1; i <= 5; i++) {
+    const step = $(`step${i}`);
 
     if (!step) continue;
 
@@ -304,7 +347,7 @@ function resetLoadingSteps() {
       step.querySelector("span");
 
     if (span) {
-      span.textContent = "✓";
+      span.textContent = "○";
     }
   }
 
@@ -335,34 +378,23 @@ function setLoadingStep(
   stepNumber,
   text
 ) {
-
   const current =
     $(`step${stepNumber}`);
 
   if (!current) return;
 
-  for (
-    let i = 1;
-    i <= 5;
-    i++
-  ) {
-
-    const step =
-      $(`step${i}`);
+  for (let i = 1; i <= 5; i++) {
+    const step = $(`step${i}`);
 
     if (!step) continue;
 
     if (i < stepNumber) {
       step.classList.add("done");
       step.classList.remove("active");
-    }
-
-    else if (i === stepNumber) {
+    } else if (i === stepNumber) {
       step.classList.add("active");
       step.classList.remove("done");
-    }
-
-    else {
+    } else {
       step.classList.remove(
         "done",
         "active"
@@ -392,7 +424,6 @@ function setLoadingStep(
     $("loadingProgressLine");
 
   if (line) {
-
     const percentage =
       Math.max(
         5,
@@ -403,17 +434,12 @@ function setLoadingStep(
       "--loading-progress",
       `${percentage}%`
     );
-
-    line.classList.remove(
-      "complete"
-    );
   }
 }
 
 function completeLoadingStep(
   stepNumber
 ) {
-
   const step =
     $(`step${stepNumber}`);
 
@@ -433,24 +459,15 @@ function completeLoadingStep(
     $("loadingProgressLine");
 
   if (line) {
-
-    const percentage =
-      (stepNumber / 5) * 100;
-
     line.style.setProperty(
       "--loading-progress",
-      `${percentage}%`
+      `${(stepNumber / 5) * 100}%`
     );
   }
 }
 
 function completeAllLoadingSteps() {
-
-  for (
-    let i = 1;
-    i <= 5;
-    i++
-  ) {
+  for (let i = 1; i <= 5; i++) {
     completeLoadingStep(i);
   }
 
@@ -463,9 +480,7 @@ function completeAllLoadingSteps() {
       "100%"
     );
 
-    line.classList.add(
-      "complete"
-    );
+    line.classList.add("complete");
   }
 
   const loadingText =
@@ -479,20 +494,46 @@ function completeAllLoadingSteps() {
 
 
 /* =========================================================
+   100 WORD SUMMARY
+   ========================================================= */
+
+function make100WordSummary(text) {
+  const clean = String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) {
+    return "No AI summary was returned for this video.";
+  }
+
+  const words = clean.split(" ");
+
+  /*
+   * Keep approximately 100 words.
+   * We do not invent fake AI information.
+   */
+  if (words.length <= 100) {
+    return clean;
+  }
+
+  return (
+    words.slice(0, 100).join(" ") + "..."
+  );
+}
+
+
+/* =========================================================
    ANALYZE
    ========================================================= */
 
 async function analyze() {
-
   const url =
     youtubeUrl.value.trim();
 
   if (!url) {
-
     showError(
       "Please paste a YouTube video URL."
     );
-
     return;
   }
 
@@ -500,11 +541,9 @@ async function analyze() {
     parseYouTubeId(url);
 
   if (!videoId) {
-
     showError(
       "Invalid YouTube URL. Please use a normal YouTube video, Shorts, or youtu.be URL."
     );
-
     return;
   }
 
@@ -512,7 +551,6 @@ async function analyze() {
   hide(report);
 
   resetLoadingSteps();
-
   show(loading);
 
   analyzeBtn.disabled = true;
@@ -529,7 +567,6 @@ async function analyze() {
   }
 
   try {
-
     /* STEP 1 */
 
     setLoadingStep(
@@ -579,7 +616,6 @@ async function analyze() {
     }
 
     if (!response.ok) {
-
       throw new Error(
         data.error ||
         "Server returned an error."
@@ -631,7 +667,6 @@ async function analyze() {
     await sleep(450);
 
     hide(loading);
-
     show(report);
 
     window.scrollTo({
@@ -640,7 +675,6 @@ async function analyze() {
     });
 
   } catch (error) {
-
     hide(loading);
 
     showError(
@@ -649,7 +683,6 @@ async function analyze() {
     );
 
   } finally {
-
     analyzeBtn.disabled = false;
 
     analyzeBtn.classList.remove(
@@ -669,7 +702,6 @@ async function analyze() {
    ========================================================= */
 
 function renderReport(data) {
-
   const video =
     data.video || {};
 
@@ -750,8 +782,8 @@ function renderReport(data) {
   setText(
     "language",
     video.defaultLanguage ||
-      video.defaultAudioLanguage ||
-      "Not specified"
+    video.defaultAudioLanguage ||
+    "Not specified"
   );
 
   setText(
@@ -771,6 +803,9 @@ function renderReport(data) {
       : "Not available"
   );
 
+
+  /* VIDEO FRAME */
+
   const iframe =
     $("videoFrame");
 
@@ -778,16 +813,19 @@ function renderReport(data) {
     iframe &&
     video.id
   ) {
-
     iframe.src =
-      `https://www.youtube.com/embed/${encodeURIComponent(video.id)}`;
+      `https://www.youtube.com/embed/${encodeURIComponent(
+        video.id
+      )}`;
   }
+
+
+  /* WATCH */
 
   const watch =
     $("watchVideo");
 
   if (watch) {
-
     watch.href =
       video.url ||
       `https://www.youtube.com/watch?v=${video.id}`;
@@ -799,7 +837,7 @@ function renderReport(data) {
   setText(
     "descriptionText",
     video.description ||
-      "No description available."
+    "No description available."
   );
 
   setText(
@@ -965,10 +1003,18 @@ function renderReport(data) {
     ai.searchIntent
   );
 
+
+  /* 100 WORD SUMMARY */
+
   setText(
     "summary",
-    ai.summary
+    make100WordSummary(
+      ai.summary
+    )
   );
+
+
+  /* KEY POINTS */
 
   list(
     "keyPoints",
@@ -990,7 +1036,9 @@ function renderReport(data) {
   );
 
 
-  /* LEVEL 3 */
+  /* =======================================================
+     LEVEL 3 — ONLY 5 EACH
+     ======================================================= */
 
   orderedList(
     "shortsIdeas",
@@ -1012,25 +1060,65 @@ function renderReport(data) {
     ai.faqIdeas
   );
 
+
+  /* =======================================================
+     BETTER TITLES — 10
+     ======================================================= */
+
   renderSuggestions(
     "titleSuggestions",
     ai.titleSuggestions
   );
 
+
+  /* CONTENT GAPS */
+
   renderGaps(
     ai.contentGaps
   );
 
-  renderRelatedVideos(
-    data.relatedVideos || []
-  );
 
-
-  /* LOCATION */
+  /* =======================================================
+     WORLD MAP FIRST
+     ======================================================= */
 
   renderLocation(
     video.location
   );
+
+
+  /* =======================================================
+     RELATED VIDEOS AFTER MAP
+     ======================================================= */
+
+  moveRelatedVideosAfterMap();
+
+  renderRelatedVideos(
+    data.relatedVideos || []
+  );
+}
+
+
+/* =========================================================
+   MOVE RELATED VIDEOS AFTER WORLD MAP
+   ========================================================= */
+
+function moveRelatedVideosAfterMap() {
+  const mapSection =
+    $("map");
+
+  const relatedSection =
+    $("competitor");
+
+  if (
+    mapSection &&
+    relatedSection
+  ) {
+    mapSection.parentNode.insertBefore(
+      relatedSection,
+      mapSection.nextElementSibling
+    );
+  }
 }
 
 
@@ -1038,10 +1126,7 @@ function renderReport(data) {
    CHAPTERS
    ========================================================= */
 
-function renderChapters(
-  chapters
-) {
-
+function renderChapters(chapters) {
   const element =
     $("chapters");
 
@@ -1051,7 +1136,6 @@ function renderChapters(
     !Array.isArray(chapters) ||
     !chapters.length
   ) {
-
     element.innerHTML = `
       <div class="chapter">
         <strong>No chapters found</strong>
@@ -1070,13 +1154,11 @@ function renderChapters(
       .map(
         (chapter) => `
           <div class="chapter">
-
             <span class="chapter-time">
               ${escapeHtml(chapter.time)}
             </span>
 
             ${escapeHtml(chapter.title)}
-
           </div>
         `
       )
@@ -1089,14 +1171,9 @@ function renderChapters(
    ========================================================= */
 
 function normalizeTranscript(data) {
+  if (!data) return null;
 
-  if (!data) {
-    return null;
-  }
-
-  if (
-    typeof data === "string"
-  ) {
+  if (typeof data === "string") {
     return {
       text: data,
       language: "Unknown",
@@ -1104,15 +1181,12 @@ function normalizeTranscript(data) {
     };
   }
 
-  if (
-    Array.isArray(data)
-  ) {
-
+  if (Array.isArray(data)) {
     return {
       segments: data,
       text: data
         .map(
-          item =>
+          (item) =>
             item.text ||
             item.content ||
             ""
@@ -1138,10 +1212,7 @@ function normalizeTranscript(data) {
   };
 }
 
-function renderTranscript(
-  transcript
-) {
-
+function renderTranscript(transcript) {
   const container =
     $("transcriptContainer");
 
@@ -1157,10 +1228,8 @@ function renderTranscript(
     data.available === false ||
     !data.text
   ) {
-
     container.innerHTML = `
       <div class="transcript-empty">
-
         <div class="transcript-empty-icon">
           🎙️
         </div>
@@ -1175,7 +1244,6 @@ function renderTranscript(
             for this video.
           </p>
         </div>
-
       </div>
     `;
 
@@ -1186,7 +1254,6 @@ function renderTranscript(
     String(data.text);
 
   container.innerHTML = `
-
     <div class="transcript-toolbar">
 
       <div>
@@ -1215,20 +1282,16 @@ function renderTranscript(
     >
       ${escapeHtml(text)}
     </div>
-
   `;
 
   const copyButton =
     $("copyTranscriptBtn");
 
   if (copyButton) {
-
     copyButton.addEventListener(
       "click",
       async () => {
-
         try {
-
           await navigator.clipboard.writeText(
             text
           );
@@ -1242,7 +1305,6 @@ function renderTranscript(
           }, 1800);
 
         } catch {
-
           copyButton.textContent =
             "Copy failed";
         }
@@ -1256,23 +1318,13 @@ function renderTranscript(
    COPYRIGHT
    ========================================================= */
 
-function renderCopyright(
-  copyright
-) {
-
+function renderCopyright(copyright) {
   const container =
     $("copyrightContainer");
 
   if (!container) return;
 
-  /*
-   * IMPORTANT:
-   * Public YouTube metadata normally cannot prove
-   * that a video is copyright-free.
-   */
-
-  let status =
-    "Unknown";
+  let status = "Unknown";
 
   let title =
     "Copyright status cannot be verified";
@@ -1284,7 +1336,6 @@ function renderCopyright(
     "copyright-unknown";
 
   if (copyright) {
-
     const raw =
       typeof copyright === "string"
         ? copyright
@@ -1296,8 +1347,7 @@ function renderCopyright(
           );
 
     const normalized =
-      String(raw)
-        .toLowerCase();
+      String(raw).toLowerCase();
 
     if (
       normalized.includes(
@@ -1308,7 +1358,6 @@ function renderCopyright(
       ) ||
       normalized === "free"
     ) {
-
       status =
         "Claimed as free";
 
@@ -1329,7 +1378,6 @@ function renderCopyright(
         "claimed"
       )
     ) {
-
       status =
         "Copyright indicated";
 
@@ -1345,14 +1393,14 @@ function renderCopyright(
   }
 
   container.innerHTML = `
-
     <div class="copyright-box ${className}">
 
       <div class="copyright-icon">
         ${
           status === "Unknown"
             ? "ⓘ"
-            : status === "Copyright indicated"
+            : status ===
+              "Copyright indicated"
               ? "©"
               : "✓"
         }
@@ -1379,7 +1427,6 @@ function renderCopyright(
       </div>
 
     </div>
-
   `;
 }
 
@@ -1388,10 +1435,7 @@ function renderCopyright(
    TONE
    ========================================================= */
 
-function renderTone(
-  tone
-) {
-
+function renderTone(tone) {
   const element =
     $("toneList");
 
@@ -1401,10 +1445,8 @@ function renderTone(
     !tone ||
     typeof tone !== "object"
   ) {
-
     element.innerHTML =
       "<p>No tone analysis.</p>";
-
     return;
   }
 
@@ -1413,7 +1455,6 @@ function renderTone(
       .slice(0, 8)
       .map(
         ([name, value]) => {
-
           const n =
             Math.max(
               0,
@@ -1455,32 +1496,29 @@ function renderTone(
 
 
 /* =========================================================
-   SUGGESTIONS
+   BETTER TITLES — 10
    ========================================================= */
 
 function renderSuggestions(
   elementId,
   values
 ) {
-
   const element =
     $(elementId);
 
   if (!element) return;
 
-  if (
-    !Array.isArray(values) ||
-    !values.length
-  ) {
+  const items =
+    normalizeArray(values);
 
+  if (!items.length) {
     element.innerHTML =
-      "<div class='suggestion'>No suggestions.</div>";
-
+      "<div class='suggestion'>No title suggestions.</div>";
     return;
   }
 
   element.innerHTML =
-    values
+    items
       .slice(0, 10)
       .map(
         (value, index) => `
@@ -1490,7 +1528,9 @@ function renderSuggestions(
               ${index + 1}
             </span>
 
-            ${escapeHtml(value)}
+            <span class="suggestion-text">
+              ${escapeHtml(value)}
+            </span>
 
           </div>
         `
@@ -1503,28 +1543,23 @@ function renderSuggestions(
    CONTENT GAPS
    ========================================================= */
 
-function renderGaps(
-  values
-) {
-
+function renderGaps(values) {
   const element =
     $("contentGaps");
 
   if (!element) return;
 
-  if (
-    !Array.isArray(values) ||
-    !values.length
-  ) {
+  const items =
+    normalizeArray(values);
 
+  if (!items.length) {
     element.innerHTML =
       "<div class='gap-item'>No major content gaps detected.</div>";
-
     return;
   }
 
   element.innerHTML =
-    values
+    items
       .slice(0, 20)
       .map(
         (value) =>
@@ -1540,10 +1575,7 @@ function renderGaps(
    RELATED VIDEOS
    ========================================================= */
 
-function renderRelatedVideos(
-  videos
-) {
-
+function renderRelatedVideos(videos) {
   const element =
     $("relatedVideos");
 
@@ -1553,7 +1585,6 @@ function renderRelatedVideos(
     !Array.isArray(videos) ||
     !videos.length
   ) {
-
     element.innerHTML =
       `<div class="related-card-body">
         No related videos available.
@@ -1566,60 +1597,105 @@ function renderRelatedVideos(
     videos
       .slice(0, 12)
       .map(
-        (video) => `
+        (video) => {
+          const safeUrl =
+            video.url ||
+            (
+              video.id
+                ? `https://www.youtube.com/watch?v=${video.id}`
+                : "#"
+            );
 
-          <a
-            class="related-card"
-            href="${escapeHtml(video.url)}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          const thumbnail =
+            video.thumbnail ||
+            (
+              video.id
+                ? `https://i.ytimg.com/vi/${encodeURIComponent(
+                    video.id
+                  )}/hqdefault.jpg`
+                : ""
+            );
 
-            <img
-              src="${escapeHtml(video.thumbnail)}"
-              alt="${escapeHtml(video.title)}"
-              loading="lazy"
-            />
+          return `
+            <a
+              class="related-card"
+              href="${escapeHtml(safeUrl)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
 
-            <div class="related-card-body">
+              ${
+                thumbnail
+                  ? `
+                    <img
+                      src="${escapeHtml(thumbnail)}"
+                      alt="${escapeHtml(
+                        video.title ||
+                        "Related YouTube video"
+                      )}"
+                      loading="lazy"
+                    />
+                  `
+                  : ""
+              }
 
-              <div class="related-card-title">
-                ${escapeHtml(video.title)}
+              <div class="related-card-body">
+
+                <div class="related-card-title">
+                  ${escapeHtml(
+                    video.title ||
+                    "Untitled video"
+                  )}
+                </div>
+
+                <div class="related-card-channel">
+                  ${escapeHtml(
+                    video.channelTitle || ""
+                  )}
+                </div>
+
               </div>
 
-              <div class="related-card-channel">
-                ${escapeHtml(
-                  video.channelTitle || ""
-                )}
-              </div>
-
-            </div>
-
-          </a>
-
-        `
+            </a>
+          `;
+        }
       )
       .join("");
 }
 
 
 /* =========================================================
-   WORLD MAP
+   EXTERNAL SCRIPT LOADER
    ========================================================= */
 
-async function loadExternalScript(
-  src
-) {
-
+async function loadExternalScript(src) {
   return new Promise(
     (resolve, reject) => {
-
-      if (
+      const existing =
         document.querySelector(
           `script[src="${src}"]`
-        )
-      ) {
-        resolve();
+        );
+
+      if (existing) {
+        if (
+          existing.dataset.loaded ===
+          "true"
+        ) {
+          resolve();
+        } else {
+          existing.addEventListener(
+            "load",
+            resolve,
+            { once: true }
+          );
+
+          existing.addEventListener(
+            "error",
+            reject,
+            { once: true }
+          );
+        }
+
         return;
       }
 
@@ -1631,16 +1707,18 @@ async function loadExternalScript(
       script.src = src;
       script.async = true;
 
-      script.onload =
-        () => resolve();
+      script.onload = () => {
+        script.dataset.loaded =
+          "true";
+        resolve();
+      };
 
-      script.onerror =
-        () =>
-          reject(
-            new Error(
-              `Failed to load ${src}`
-            )
-          );
+      script.onerror = () =>
+        reject(
+          new Error(
+            `Failed to load ${src}`
+          )
+        );
 
       document.head.appendChild(
         script
@@ -1649,26 +1727,25 @@ async function loadExternalScript(
   );
 }
 
-async function createWorldMap(
-  location
-) {
 
+/* =========================================================
+   WORLD MAP
+   ========================================================= */
+
+async function createWorldMap(location) {
   const container =
     $("mapContainer");
 
   if (!container) return;
 
   container.innerHTML = `
-
     <div class="world-map-loading">
       <div class="map-spinner"></div>
-      <span>Loading world map...</span>
+      <span>Loading colorful world map...</span>
     </div>
-
   `;
 
   try {
-
     await loadExternalScript(
       "https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"
     );
@@ -1695,14 +1772,14 @@ async function createWorldMap(
 
     const width =
       Math.max(
-        300,
+        320,
         container.clientWidth || 900
       );
 
     const height =
       window.innerWidth <= 600
         ? 260
-        : 430;
+        : 450;
 
     const svg =
       d3.select(container)
@@ -1710,6 +1787,10 @@ async function createWorldMap(
         .attr(
           "viewBox",
           `0 0 ${width} ${height}`
+        )
+        .attr(
+          "preserveAspectRatio",
+          "xMidYMid meet"
         )
         .attr(
           "role",
@@ -1720,15 +1801,35 @@ async function createWorldMap(
           "Colorful world map showing video location"
         );
 
+    /* MAP BACKGROUND */
+
+    svg
+      .append("rect")
+      .attr(
+        "width",
+        width
+      )
+      .attr(
+        "height",
+        height
+      )
+      .attr(
+        "fill",
+        "#eef6ff"
+      );
+
+
+    /* GRADIENT */
+
     const defs =
       svg.append("defs");
 
-    const gradient =
+    const oceanGradient =
       defs
         .append("linearGradient")
         .attr(
           "id",
-          "worldMapGradient"
+          "oceanGradient"
         )
         .attr(
           "x1",
@@ -1747,7 +1848,7 @@ async function createWorldMap(
           "100%"
         );
 
-    gradient
+    oceanGradient
       .append("stop")
       .attr(
         "offset",
@@ -1755,32 +1856,21 @@ async function createWorldMap(
       )
       .attr(
         "stop-color",
-        "#635bff"
+        "#dbeafe"
       );
 
-    gradient
+    oceanGradient
       .append("stop")
       .attr(
         "offset",
-        "35%"
+        "50%"
       )
       .attr(
         "stop-color",
-        "#06b6d4"
+        "#cffafe"
       );
 
-    gradient
-      .append("stop")
-      .attr(
-        "offset",
-        "65%"
-      )
-      .attr(
-        "stop-color",
-        "#22c55e"
-      );
-
-    gradient
+    oceanGradient
       .append("stop")
       .attr(
         "offset",
@@ -1788,42 +1878,7 @@ async function createWorldMap(
       )
       .attr(
         "stop-color",
-        "#f97316"
-      );
-
-    const projection =
-      d3.geoNaturalEarth1()
-        .fitSize(
-          [
-            width - 30,
-            height - 30
-          ],
-          {
-            type: "Sphere"
-          }
-        );
-
-    const path =
-      d3.geoPath()
-        .projection(
-          projection
-        );
-
-    const countryColors = [
-      "#635bff",
-      "#06b6d4",
-      "#22c55e",
-      "#f59e0b",
-      "#ec4899",
-      "#8b5cf6",
-      "#ef4444",
-      "#14b8a6"
-    ];
-
-    const countries =
-      topojson.feature(
-        world,
-        world.objects.countries
+        "#e0e7ff"
       );
 
     svg
@@ -1838,13 +1893,67 @@ async function createWorldMap(
       )
       .attr(
         "fill",
-        "#eef4ff"
+        "url(#oceanGradient)"
       );
+
+
+    /* PROJECTION */
+
+    const projection =
+      d3.geoNaturalEarth1()
+        .fitExtent(
+          [
+            [15, 15],
+            [width - 15, height - 15]
+          ],
+          {
+            type: "Sphere"
+          }
+        );
+
+    const path =
+      d3.geoPath()
+        .projection(
+          projection
+        );
+
+
+    /* COLORFUL COUNTRIES */
+
+    const countryColors = [
+      "#6366f1",
+      "#06b6d4",
+      "#22c55e",
+      "#f59e0b",
+      "#ef4444",
+      "#ec4899",
+      "#8b5cf6",
+      "#14b8a6",
+      "#3b82f6",
+      "#84cc16",
+      "#f97316",
+      "#a855f7"
+    ];
+
+    const countries =
+      topojson.feature(
+        world,
+        world.objects.countries
+      );
+
+
+    /* COUNTRY BORDERS */
 
     svg
       .append("g")
+      .attr(
+        "class",
+        "world-countries"
+      )
       .selectAll("path")
-      .data(countries.features)
+      .data(
+        countries.features
+      )
       .join("path")
       .attr(
         "d",
@@ -1855,12 +1964,12 @@ async function createWorldMap(
         (d, index) =>
           countryColors[
             index %
-              countryColors.length
+            countryColors.length
           ]
       )
       .attr(
         "fill-opacity",
-        0.78
+        0.82
       )
       .attr(
         "stroke",
@@ -1868,11 +1977,7 @@ async function createWorldMap(
       )
       .attr(
         "stroke-width",
-        0.6
-      )
-      .style(
-        "transition",
-        "0.2s ease"
+        0.65
       )
       .on(
         "mouseenter",
@@ -1890,14 +1995,13 @@ async function createWorldMap(
           d3.select(this)
             .attr(
               "fill-opacity",
-              0.78
+              0.82
             );
         }
       );
 
-    /*
-     * LOCATION MARKER
-     */
+
+    /* LOCATION */
 
     const lat =
       Number(
@@ -1917,8 +2021,8 @@ async function createWorldMap(
       lon >= -180 &&
       lon <= 180;
 
-    if (validLocation) {
 
+    if (validLocation) {
       const point =
         projection([
           lon,
@@ -1926,7 +2030,6 @@ async function createWorldMap(
         ]);
 
       if (point) {
-
         const marker =
           svg
             .append("g")
@@ -1943,7 +2046,7 @@ async function createWorldMap(
           .append("circle")
           .attr(
             "r",
-            15
+            20
           )
           .attr(
             "fill",
@@ -1951,7 +2054,7 @@ async function createWorldMap(
           )
           .attr(
             "fill-opacity",
-            0.2
+            0.22
           )
           .attr(
             "class",
@@ -1962,7 +2065,7 @@ async function createWorldMap(
           .append("circle")
           .attr(
             "r",
-            7
+            8
           )
           .attr(
             "fill",
@@ -1980,10 +2083,15 @@ async function createWorldMap(
         marker
           .append("title")
           .text(
-            `Video location: ${lat.toFixed(4)}, ${lon.toFixed(4)}`
+            `Video location: ${lat.toFixed(
+              4
+            )}, ${lon.toFixed(4)}`
           );
       }
     }
+
+
+    /* MAP INFO */
 
     const info =
       document.createElement(
@@ -1994,34 +2102,41 @@ async function createWorldMap(
       "map-info-overlay";
 
     if (validLocation) {
-
       info.innerHTML = `
         <span class="map-info-dot"></span>
-        <strong>Public location detected</strong>
+
+        <strong>
+          Public location detected
+        </strong>
+
         <span>
-          ${lat.toFixed(4)}, ${lon.toFixed(4)}
+          ${lat.toFixed(4)},
+          ${lon.toFixed(4)}
         </span>
       `;
-
     } else {
-
       info.innerHTML = `
         <span class="map-info-dot map-info-dot-muted"></span>
-        <strong>No public location data</strong>
+
+        <strong>
+          No public location data
+        </strong>
+
         <span>
-          World map shown for geographic context
+          Colorful world map shown for geographic context
         </span>
       `;
     }
 
-    container.appendChild(
-      info
-    );
+    container.appendChild(info);
 
   } catch (error) {
+    console.error(
+      "World map error:",
+      error
+    );
 
     container.innerHTML = `
-
       <div class="map-fallback">
 
         <div class="map-icon">
@@ -2056,18 +2171,12 @@ async function createWorldMap(
         }
 
       </div>
-
     `;
   }
 }
 
-function renderLocation(
-  location
-) {
-
-  createWorldMap(
-    location
-  );
+function renderLocation(location) {
+  createWorldMap(location);
 }
 
 
@@ -2075,10 +2184,7 @@ function renderLocation(
    ERROR
    ========================================================= */
 
-function showError(
-  message
-) {
-
+function showError(message) {
   if (errorMessage) {
     errorMessage.textContent =
       message;
@@ -2106,16 +2212,14 @@ function sleep(ms) {
 
 
 /* =========================================================
-   SAMPLE
+   SAMPLE URL
    ========================================================= */
 
 if ($("exampleBtn")) {
-
   $("exampleBtn")
     .addEventListener(
       "click",
       () => {
-
         youtubeUrl.value =
           "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 
@@ -2130,12 +2234,10 @@ if ($("exampleBtn")) {
    ========================================================= */
 
 if (analyzeBtn) {
-
-  analyzeBtn
-    .addEventListener(
-      "click",
-      analyze
-    );
+  analyzeBtn.addEventListener(
+    "click",
+    analyze
+  );
 }
 
 
@@ -2144,23 +2246,17 @@ if (analyzeBtn) {
    ========================================================= */
 
 if (youtubeUrl) {
-
-  youtubeUrl
-    .addEventListener(
-      "keydown",
-      (event) => {
-
-        if (
-          event.key === "Enter"
-        ) {
-
-          event.preventDefault();
-
-          analyze();
-        }
-
+  youtubeUrl.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.key === "Enter"
+      ) {
+        event.preventDefault();
+        analyze();
       }
-    );
+    }
+  );
 }
 
 
@@ -2169,18 +2265,14 @@ if (youtubeUrl) {
    ========================================================= */
 
 if ($("exportJsonBtn")) {
-
   $("exportJsonBtn")
     .addEventListener(
       "click",
       () => {
-
         if (!latestReport) {
-
           showError(
             "Analyze a video first."
           );
-
           return;
         }
 
@@ -2237,18 +2329,14 @@ if ($("exportJsonBtn")) {
    ========================================================= */
 
 if ($("printBtn")) {
-
   $("printBtn")
     .addEventListener(
       "click",
       () => {
-
         if (!latestReport) {
-
           showError(
             "Analyze a video first."
           );
-
           return;
         }
 
@@ -2269,12 +2357,10 @@ const overlay =
   $("sidebarOverlay");
 
 if ($("menuToggle")) {
-
   $("menuToggle")
     .addEventListener(
       "click",
       () => {
-
         if (!sidebar) return;
 
         sidebar.classList.toggle(
@@ -2295,32 +2381,29 @@ if ($("menuToggle")) {
 }
 
 if (overlay) {
-
-  overlay
-    .addEventListener(
-      "click",
-      () => {
-
-        if (sidebar) {
-          sidebar.classList.remove(
-            "open"
-          );
-        }
-
-        overlay.classList.remove(
-          "show"
-        );
-
-        document.body.classList.remove(
-          "menu-open"
+  overlay.addEventListener(
+    "click",
+    () => {
+      if (sidebar) {
+        sidebar.classList.remove(
+          "open"
         );
       }
-    );
+
+      overlay.classList.remove(
+        "show"
+      );
+
+      document.body.classList.remove(
+        "menu-open"
+      );
+    }
+  );
 }
 
 
 /* =========================================================
-   CLOSE MOBILE MENU AFTER NAVIGATION
+   CLOSE MOBILE MENU
    ========================================================= */
 
 document
@@ -2329,15 +2412,12 @@ document
   )
   .forEach(
     (item) => {
-
       item.addEventListener(
         "click",
         () => {
-
           if (
             window.innerWidth <= 850
           ) {
-
             if (sidebar) {
               sidebar.classList.remove(
                 "open"
@@ -2356,6 +2436,5 @@ document
           }
         }
       );
-
     }
   );
