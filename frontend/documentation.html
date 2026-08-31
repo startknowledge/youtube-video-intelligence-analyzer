@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documentation | YouTube Video Intelligence Analyzer</title>
+  <meta name="description" content="Documentation for using YouTube Video Intelligence Analyzer, including inputs, analysis fields, transcript support, AI providers, and limitations.">
+  <link rel="canonical" href="https://youtubevideointanalyzer.startknowledge.in/">
+  <link rel="stylesheet" href="assets/css/footer.css">
+  <!-- Add your Bootstrap/font-awesome CSS before this file if your project uses them. -->
+</head>
+<body>
+<main class="container py-5">
+
+<h1>Documentation</h1>
+<h2>Overview</h2>
+<p>YouTube Video Intelligence Analyzer accepts a supported YouTube video URL and builds an analysis from the information available to the application. The workflow can include video identification, metadata retrieval, transcript retrieval where supported, local analysis, SEO analysis, keyword extraction, and AI-assisted intelligence.</p>
+<h2>Basic workflow</h2>
+<ol>
+<li>Open the analyzer.</li>
+<li>Enter a valid public YouTube URL.</li>
+<li>Start analysis.</li>
+<li>Wait for metadata and supported analysis components to load.</li>
+<li>Review the generated results.</li>
+<li>Verify important information against the original video.</li>
+</ol>
+<h2>Metadata</h2>
+<p>Metadata can include title, channel name, category, publication date, duration, description, tags where available, and public statistics supplied by the data source. Metadata availability can vary by video and API permissions.</p>
+<h2>Transcript</h2>
+<p>When transcript retrieval is supported and successful, the transcript can be passed to the AI analysis layer. The transcript can help the system understand the actual spoken topic, key explanations, examples, questions, and repeated themes. Transcript results should not be considered perfect because captions can contain recognition errors.</p>
+<h2>SEO analysis</h2>
+<p>SEO analysis can inspect title wording, description structure, keyword relevance, search intent, topical coverage, and other observable signals. These observations are recommendations, not official YouTube ranking measurements.</p>
+<h2>Keywords</h2>
+<p>Keywords can be grouped into primary and related terms. Their usefulness depends on context, audience, search behavior, competition, and the quality of the content. A generated keyword suggestion should be validated before being used in metadata.</p>
+<h2>AI intelligence fields</h2>
+<p>The analyzer can return a main topic, content type, difficulty, search intent, summary, key points, audience, tone, sentiment, Shorts ideas, blog ideas, related content ideas, FAQs, title suggestions, and content gaps. These are designed for practical content planning.</p>
+<h2>AI providers</h2>
+<p>The backend can be configured with multiple AI providers and a fallback sequence. The exact provider and model depend on the deployment configuration. If one provider fails, the application can attempt another configured provider. A local fallback may be used when all AI providers are unavailable.</p>
+<h2>Important limitation</h2>
+<p>The analyzer cannot infer private information simply from a public video URL. It should not invent revenue, private analytics, hidden CTR, private watch time, or audience demographics.</p>
+<h2>Best practices</h2>
+<p>Use the original video as the source of truth. Treat AI output as a draft for human review. Compare title suggestions with your audience and brand. Check copyright before reusing any material. Do not assume that a keyword score guarantees ranking.</p>
+<h2>Troubleshooting</h2>
+<p>If an analysis fails, verify the URL, check video accessibility, retry later, and review the Support page. Provider rate limits, transcript availability, API changes, network errors, and CORS issues can affect the workflow.</p>
+
+</main>
+
+<footer class="site-footer" aria-label="Website footer">
+  <div class="container footer-inner">
+    <div class="row g-4">
+      <div class="col-lg-5 col-md-6">
+        <h2 class="footer-text-logo">YouTube Video Intelligence Analyzer</h2>
+        <p class="footer-sub-title">
+          Practical YouTube video intelligence for keywords, SEO, metadata,
+          transcripts, content ideas, titles, FAQs, and creator-focused insights.
+        </p>
+        <ul class="list-unstyled d-flex social-list" aria-label="Social links">
+          <li><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a></li>
+          <li><a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a></li>
+          <li><a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>
+          <li><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <h2 class="footer-title">Quick Links</h2>
+        <ul class="list-unstyled footer-menu-link">
+          <li><a href="https://youtubevideointanalyzer.startknowledge.in/">Analyzer</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="documentation.html">Documentation</a></li>
+          <li><a href="support.html">Support</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-4 col-md-12">
+        <h2 class="footer-title">Legal & Privacy</h2>
+        <ul class="list-unstyled footer-menu-link">
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms and Conditions</a></li>
+          <li><a href="disclaimer.html">Disclaimer</a></li>
+          <li><a href="cookies.html">Cookies Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between gap-2">
+      <p class="copyright mb-0">&copy; 2026 YouTube Video Intelligence Analyzer. All rights reserved.</p>
+      <p class="copyright mb-0">
+        A StartKnowledge project · <a href="https://www.startknowledge.in/">StartKnowledge</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Changelog | YouTube Video Intelligence Analyzer</title>
+  <meta name="description" content="Changelog for YouTube Video Intelligence Analyzer, documenting feature updates, improvements, fixes, and planned enhancements.">
+  <link rel="canonical" href="https://youtubevideointanalyzer.startknowledge.in/">
+  <link rel="stylesheet" href="assets/css/footer.css">
+  <!-- Add your Bootstrap/font-awesome CSS before this file if your project uses them. -->
+</head>
+<body>
+<main class="container py-5">
+
+<h1>Changelog</h1>
+<p>This page records important changes to YouTube Video Intelligence Analyzer. Entries describe product-level improvements rather than every internal code change.</p>
+<h2>2026 — Initial analyzer release</h2>
+<p>The project introduced a dedicated web interface for analyzing YouTube video information. The initial workflow focused on extracting a video ID from supported YouTube URLs, retrieving metadata, and presenting structured intelligence for creators.</p>
+<h2>SEO analysis improvements</h2>
+<p>SEO-oriented analysis was expanded to include title observations, description analysis, keyword grouping, search intent, content type, and practical recommendations. The goal was to make results easier to understand without presenting third-party estimates as official YouTube metrics.</p>
+<h2>AI intelligence layer</h2>
+<p>An AI analysis layer was added to generate structured JSON containing topic, summary, key points, audience, tone, sentiment, Shorts ideas, blog ideas, related content ideas, FAQs, title suggestions, and content gaps.</p>
+<h2>Multi-provider fallback</h2>
+<p>The backend was designed to support multiple AI providers. A configured primary provider can be attempted first, followed by fallback providers when an error occurs. If all configured providers fail, a local heuristic fallback can return limited analysis rather than leaving the entire workflow without a result.</p>
+<h2>Transcript support</h2>
+<p>Transcript-aware analysis was added to allow the AI layer to use spoken content when a transcript is available. This improves the distinction between what a video is titled and what it actually explains. Transcript availability remains dependent on the video and supported retrieval method.</p>
+<h2>Responsible AI output</h2>
+<p>The analysis prompt was strengthened to prevent unsupported claims about private analytics, revenue, CTR, watch time, audience demographics, and transcript content. Missing information should be reported as unavailable rather than invented.</p>
+<h2>Metadata and creator insights</h2>
+<p>Creator-facing results were expanded to help with content planning. Generated ideas can include follow-up videos, Shorts, blogs, FAQs, titles, and related topics.</p>
+<h2>UI and footer improvements</h2>
+<p>Project pages received a more consistent footer structure, clearer navigation to legal pages, support resources, documentation, and changelog information. Responsive styling was improved for desktop and mobile layouts.</p>
+<h2>What is planned</h2>
+<p>Possible future improvements include richer transcript processing, better chapter intelligence, additional export formats, improved accessibility, stronger error diagnostics, more detailed content comparisons, and additional creator-focused reporting. Planned features are not guaranteed until they appear in a released version.</p>
+<h2>Versioning note</h2>
+<p>This changelog may summarize multiple deployment changes in one entry. The live application can change independently of this page when urgent fixes or infrastructure updates are required.</p>
+<h2>Feedback</h2>
+<p>If you notice a regression or have an idea that would make the analyzer more useful, use the Contact or Support page. Include enough technical detail to reproduce a reported problem without sharing private credentials.</p>
+
+</main>
+
+<footer class="site-footer" aria-label="Website footer">
+  <div class="container footer-inner">
+    <div class="row g-4">
+      <div class="col-lg-5 col-md-6">
+        <h2 class="footer-text-logo">YouTube Video Intelligence Analyzer</h2>
+        <p class="footer-sub-title">
+          Practical YouTube video intelligence for keywords, SEO, metadata,
+          transcripts, content ideas, titles, FAQs, and creator-focused insights.
+        </p>
+        <ul class="list-unstyled d-flex social-list" aria-label="Social links">
+          <li><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a></li>
+          <li><a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a></li>
+          <li><a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>
+          <li><a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-3 col-md-6">
+        <h2 class="footer-title">Quick Links</h2>
+        <ul class="list-unstyled footer-menu-link">
+          <li><a href="https://youtubevideointanalyzer.startknowledge.in/">Analyzer</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="documentation.html">Documentation</a></li>
+          <li><a href="support.html">Support</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+
+      <div class="col-lg-4 col-md-12">
+        <h2 class="footer-title">Legal & Privacy</h2>
+        <ul class="list-unstyled footer-menu-link">
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms and Conditions</a></li>
+          <li><a href="disclaimer.html">Disclaimer</a></li>
+          <li><a href="cookies.html">Cookies Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between gap-2">
+      <p class="copyright mb-0">&copy; 2026 YouTube Video Intelligence Analyzer. All rights reserved.</p>
+      <p class="copyright mb-0">
+        A StartKnowledge project · <a href="https://www.startknowledge.in/">StartKnowledge</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
