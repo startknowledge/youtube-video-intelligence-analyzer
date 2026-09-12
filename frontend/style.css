@@ -1749,11 +1749,11 @@ svg {
 
 /* Mobile sidebar */
 @media (max-width: 850px) {
-  :root {
+  /*:root {
     --sidebar-width: 0px;
-  }
+  }*/
   .sidebar {
-    transform: translateX(-100%);
+    transform: translateX(-100vw);
     transition: transform 0.25s ease;
     box-shadow: 15px 0 45px rgba(15, 23, 42, 0.25);
   }
