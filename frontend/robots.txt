@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 
+Disallow: /google0278c877dab13082.html
+
 Sitemap: https://youtubevideointanalyzer.startknowledge.in/sitemap.xml
