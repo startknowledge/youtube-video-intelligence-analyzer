@@ -1,0 +1,96 @@
+name: IndexNow URL Submission
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Submit changed HTML pages to IndexNow
+        env:
+          # अगर नया नाम रखा है तो यहाँ भी वही नाम डालें
+          INDEXNOW_API_KEY: ${{ secrets.BING_YOUTUBE_INDEXNOW_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          import json
+          import urllib.request
+          import urllib.error
+
+          api_key = os.environ["INDEXNOW_API_KEY"]
+          
+          # CHANGE 1: यहाँ सबडोमेन का नाम डालें (www. हटा दें)
+          host = "youtubevideointanalyzer.startknowledge.in"
+
+          # CHANGE 2: यहाँ सबडोमेन की नई Key फाइल का URL डालें
+          key_location = (
+              "https://youtubevideointanalyzer.startknowledge.in/"
+              "bf010bf05af74c0f94eac36b92ecb1bc.txt"
+          )
+
+          try:
+              changed = subprocess.check_output(
+                  ["git", "diff", "--name-only", "HEAD~1", "HEAD"],
+                  text=True
+              ).splitlines()
+          except Exception:
+              changed = []
+
+          urls = []
+
+          for file in changed:
+              if file.endswith(".html") and not file.startswith(".github/"):
+                  url = "https://" + host + "/" + file.replace("\\", "/")
+                  urls.append(url)
+
+          urls = sorted(set(urls))
+
+          if not urls:
+              print("No changed HTML pages found.")
+              exit(0)
+
+          print("URLs to submit:")
+          for url in urls:
+              print(url)
+
+          payload = {
+              "host": host,
+              "key": api_key,
+              "keyLocation": key_location,
+              "urlList": urls
+          }
+
+          data = json.dumps(payload).encode("utf-8")
+
+          request = urllib.request.Request(
+              "https://api.indexnow.org/indexnow",
+              data=data,
+              headers={
+                  "Content-Type": "application/json; charset=utf-8"
+              },
+              method="POST"
+          )
+
+          try:
+              with urllib.request.urlopen(request) as response:
+                  print("IndexNow HTTP status:", response.status)
+                  print(response.read().decode("utf-8", errors="ignore"))
+          except urllib.error.HTTPError as error:
+              print("IndexNow HTTP error:", error.code)
+              print(error.read().decode("utf-8", errors="ignore"))
+              raise
+          PY
