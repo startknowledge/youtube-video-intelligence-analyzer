@@ -18,6 +18,10 @@ import {
   generateAI
 } from "./ai.js";
 
+import {
+  fetchTranscript
+} from "./transcript.js";
+
 export default {
 
   async fetch(
@@ -228,6 +232,38 @@ async function analyzeRequest(
       }
     }
 
+        /* STEP 3.5: TRANSCRIPT */
+
+    let transcript = null;
+
+    try {
+
+      transcript =
+        await fetchTranscript(videoId);
+
+      if (transcript) {
+
+        console.log(
+          `Transcript fetched for ${videoId}: ${transcript.wordCount} words`
+        );
+
+      } else {
+
+        console.log(
+          `No transcript found for ${videoId}`
+        );
+      }
+
+    } catch (error) {
+
+      console.error(
+        "TRANSCRIPT ERROR:",
+        error
+      );
+
+      transcript = null;
+    }
+
     /* STEP 4: AI */
 
     let ai = {
@@ -299,6 +335,8 @@ async function analyzeRequest(
 
       chapters:
         analysis.chapters,
+
+      transcript,
 
       relatedVideos,
 
