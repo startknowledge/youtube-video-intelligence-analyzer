@@ -2215,18 +2215,25 @@ function sleep(ms) {
    SAMPLE URL
    ========================================================= */
 
+// app.js में replace करें
 if ($("exampleBtn")) {
-  $("exampleBtn")
-    .addEventListener(
-      "click",
-      () => {
-        youtubeUrl.value =
-          "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  $("exampleBtn").addEventListener("click", () => {
+    const samples = [
+      "https://www.youtube.com/watch?v=KVWjVZpCYps",
+      "https://www.youtube.com/watch?v=DnFDuaiAVQU",
+      "https://www.youtube.com/watch?v=XR1TyTWlEr4",
+      "https://www.youtube.com/watch?v=VIfnoLS3AR8",
+      "https://www.youtube.com/watch?v=y4FBWV8vnQM",
+      "https://www.youtube.com/watch?v=VN6nbKlPliU"
+    ];
 
-        youtubeUrl.focus();
-      }
-    );
+    const random = samples[Math.floor(Math.random() * samples.length)];
+
+    youtubeUrl.value = random;
+    youtubeUrl.focus();
+  });
 }
+
 
 
 /* =========================================================

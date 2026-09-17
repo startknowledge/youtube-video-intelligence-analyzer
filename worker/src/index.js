@@ -236,7 +236,7 @@ async function analyzeRequest(
 
     let transcript = null;
 
-    try {
+   /* try {
 
       transcript =
         await fetchTranscript(videoId);
@@ -262,7 +262,7 @@ async function analyzeRequest(
       );
 
       transcript = null;
-    }
+    }*/
 
     /* STEP 4: AI */
 
